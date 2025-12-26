@@ -1,5 +1,6 @@
 class FinancialHealth
   include Monetizable
+  include FinancialHealthThresholds
 
   monetize :liquid_assets, :monthly_income, :monthly_expenses
 
@@ -81,22 +82,22 @@ class FinancialHealth
 
     if (sr = current_savings_rate).present?
       scores << normalize_savings_rate(sr)
-      weights << 0.30
+      weights << SAVINGS_RATE_WEIGHT
     end
 
     if (dti = current_debt_to_income_ratio).present?
       scores << normalize_debt_to_income(dti)
-      weights << 0.30
+      weights << DTI_WEIGHT
     end
 
     if (ef = emergency_fund_coverage).present?
       scores << normalize_emergency_fund(ef)
-      weights << 0.25
+      weights << EMERGENCY_FUND_WEIGHT
     end
 
     if (nw = net_worth_change).present?
       scores << normalize_net_worth_trend(nw[:percentage])
-      weights << 0.15
+      weights << NET_WORTH_TREND_WEIGHT
     end
 
     return nil if scores.empty?
@@ -104,7 +105,7 @@ class FinancialHealth
     weighted_sum = scores.zip(weights).sum { |score, weight| score * weight }
     total_weight = weights.sum
 
-    ((weighted_sum / total_weight) * 100).round
+    ((weighted_sum / total_weight) * MAX_HEALTH_SCORE).round
   end
 
   # Get summary of all metrics
@@ -211,7 +212,7 @@ class FinancialHealth
                       .joins("INNER JOIN credit_cards ON credit_cards.id = accounts.accountable_id AND accounts.accountable_type = 'CreditCard'")
                       .sum(:balance).to_d
 
-      [ balance * 0.02, 25 ].max
+      [ balance * CREDIT_CARD_MIN_PAYMENT_RATE, CREDIT_CARD_MIN_PAYMENT_FLOOR ].max
     end
 
     def calculate_previous_net_worth(period)
@@ -228,9 +229,9 @@ class FinancialHealth
     def savings_rate_status(rate)
       return :unknown unless rate.present?
 
-      if rate >= 20
+      if rate >= EXCELLENT_SAVINGS_RATE
         :good
-      elsif rate >= 10
+      elsif rate >= GOOD_SAVINGS_RATE
         :fair
       else
         :poor
@@ -240,9 +241,9 @@ class FinancialHealth
     def debt_to_income_status(ratio)
       return :unknown unless ratio.present?
 
-      if ratio < 36
+      if ratio < HEALTHY_DTI_THRESHOLD
         :good
-      elsif ratio <= 43
+      elsif ratio <= MANAGEABLE_DTI_THRESHOLD
         :fair
       else
         :poor
@@ -252,9 +253,9 @@ class FinancialHealth
     def emergency_fund_status(months)
       return :unknown unless months.present?
 
-      if months >= 6
+      if months >= STRONG_EMERGENCY_FUND_MONTHS
         :good
-      elsif months >= 3
+      elsif months >= SOLID_EMERGENCY_FUND_MONTHS
         :fair
       else
         :poor
@@ -266,7 +267,7 @@ class FinancialHealth
 
       if change[:percentage] > 0
         :good
-      elsif change[:percentage] >= -5
+      elsif change[:percentage] >= STABLE_NET_WORTH_THRESHOLD
         :fair
       else
         :poor
@@ -277,36 +278,36 @@ class FinancialHealth
     def normalize_savings_rate(rate)
       return 0 unless rate.present?
 
-      [ [ rate / 20.0, 1.0 ].min, 0 ].max
+      [ [ rate / EXCELLENT_SAVINGS_RATE, 1.0 ].min, 0 ].max
     end
 
     def normalize_debt_to_income(ratio)
       return 0 unless ratio.present?
 
-      if ratio <= 36
+      if ratio <= HEALTHY_DTI_THRESHOLD
         1.0
-      elsif ratio >= 50
+      elsif ratio >= HIGH_RISK_DTI_THRESHOLD
         0.0
       else
-        1.0 - ((ratio - 36) / 14.0)
+        1.0 - ((ratio - HEALTHY_DTI_THRESHOLD) / DTI_NORMALIZATION_RANGE)
       end
     end
 
     def normalize_emergency_fund(months)
       return 0 unless months.present?
 
-      [ [ months / 6.0, 1.0 ].min, 0 ].max
+      [ [ months / STRONG_EMERGENCY_FUND_MONTHS, 1.0 ].min, 0 ].max
     end
 
     def normalize_net_worth_trend(percentage)
       return 0.5 unless percentage.present?
 
-      if percentage >= 10
+      if percentage >= EXCELLENT_NET_WORTH_GROWTH
         1.0
-      elsif percentage <= -10
+      elsif percentage <= POOR_NET_WORTH_DECLINE
         0.0
       else
-        0.5 + (percentage / 20.0)
+        0.5 + (percentage / NORMALIZATION_DIVISOR)
       end
     end
 end

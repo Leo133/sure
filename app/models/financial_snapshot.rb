@@ -1,5 +1,6 @@
 class FinancialSnapshot < ApplicationRecord
   include Monetizable
+  include FinancialHealthThresholds
 
   belongs_to :family
 
@@ -66,22 +67,36 @@ class FinancialSnapshot < ApplicationRecord
 
   # Calculate overall health score (0-100)
   def health_score
-    # Weight metrics: 30% savings rate, 30% DTI, 25% emergency fund, 15% net worth trend
     scores = []
+    weights = []
 
-    scores << (normalize_savings_rate * 0.30) if savings_rate.present?
-    scores << (normalize_debt_to_income * 0.30) if debt_to_income_ratio.present?
-    scores << (normalize_emergency_fund * 0.25) if emergency_fund_months.present?
-    scores << (normalize_net_worth_trend * 0.15) if net_worth_change_percentage.present?
+    if savings_rate.present?
+      scores << normalize_savings_rate
+      weights << SAVINGS_RATE_WEIGHT
+    end
+
+    if debt_to_income_ratio.present?
+      scores << normalize_debt_to_income
+      weights << DTI_WEIGHT
+    end
+
+    if emergency_fund_months.present?
+      scores << normalize_emergency_fund
+      weights << EMERGENCY_FUND_WEIGHT
+    end
+
+    if net_worth_change_percentage.present?
+      scores << normalize_net_worth_trend
+      weights << NET_WORTH_TREND_WEIGHT
+    end
 
     return nil if scores.empty?
 
-    # Normalize by actual weights used (in case some metrics are missing)
-    total_weight = 0.30 + 0.30 + 0.25 + 0.15
-    used_weight = scores.sum { |_| 1.0 } # Count of present metrics
-    adjustment = total_weight / (used_weight * (total_weight / 4))
+    # Calculate weighted average
+    weighted_sum = scores.zip(weights).sum { |score, weight| score * weight }
+    total_weight = weights.sum
 
-    (scores.sum * adjustment * 100).round
+    ((weighted_sum / total_weight) * MAX_HEALTH_SCORE).round
   end
 
   # Get change from previous month's snapshot
@@ -120,9 +135,9 @@ class FinancialSnapshot < ApplicationRecord
     def savings_rate_health
       return :unknown unless savings_rate.present?
 
-      if savings_rate >= 20
+      if savings_rate >= EXCELLENT_SAVINGS_RATE
         :good
-      elsif savings_rate >= 10
+      elsif savings_rate >= GOOD_SAVINGS_RATE
         :fair
       else
         :poor
@@ -132,9 +147,9 @@ class FinancialSnapshot < ApplicationRecord
     def debt_to_income_health
       return :unknown unless debt_to_income_ratio.present?
 
-      if debt_to_income_ratio < 36
+      if debt_to_income_ratio < HEALTHY_DTI_THRESHOLD
         :good
-      elsif debt_to_income_ratio <= 43
+      elsif debt_to_income_ratio <= MANAGEABLE_DTI_THRESHOLD
         :fair
       else
         :poor
@@ -144,9 +159,9 @@ class FinancialSnapshot < ApplicationRecord
     def emergency_fund_health
       return :unknown unless emergency_fund_months.present?
 
-      if emergency_fund_months >= 6
+      if emergency_fund_months >= STRONG_EMERGENCY_FUND_MONTHS
         :good
-      elsif emergency_fund_months >= 3
+      elsif emergency_fund_months >= SOLID_EMERGENCY_FUND_MONTHS
         :fair
       else
         :poor
@@ -159,7 +174,7 @@ class FinancialSnapshot < ApplicationRecord
 
       if change > 0
         :good
-      elsif change >= -5
+      elsif change >= STABLE_NET_WORTH_THRESHOLD
         :fair
       else
         :poor
@@ -170,41 +185,37 @@ class FinancialSnapshot < ApplicationRecord
     def normalize_savings_rate
       return 0 unless savings_rate.present?
 
-      # 20%+ is excellent (1.0), 0% or negative is 0
-      [ [ savings_rate / 20.0, 1.0 ].min, 0 ].max
+      [ [ savings_rate / EXCELLENT_SAVINGS_RATE, 1.0 ].min, 0 ].max
     end
 
     def normalize_debt_to_income
       return 0 unless debt_to_income_ratio.present?
 
-      # <36% is excellent (1.0), >50% is poor (0)
-      if debt_to_income_ratio <= 36
+      if debt_to_income_ratio <= HEALTHY_DTI_THRESHOLD
         1.0
-      elsif debt_to_income_ratio >= 50
+      elsif debt_to_income_ratio >= HIGH_RISK_DTI_THRESHOLD
         0.0
       else
-        1.0 - ((debt_to_income_ratio - 36) / 14.0)
+        1.0 - ((debt_to_income_ratio - HEALTHY_DTI_THRESHOLD) / DTI_NORMALIZATION_RANGE)
       end
     end
 
     def normalize_emergency_fund
       return 0 unless emergency_fund_months.present?
 
-      # 6+ months is excellent (1.0), 0 is poor (0)
-      [ [ emergency_fund_months / 6.0, 1.0 ].min, 0 ].max
+      [ [ emergency_fund_months / STRONG_EMERGENCY_FUND_MONTHS, 1.0 ].min, 0 ].max
     end
 
     def normalize_net_worth_trend
       change = net_worth_change_percentage
       return 0.5 unless change.present? # Neutral if no data
 
-      # +10% is excellent (1.0), -10% is poor (0), 0% is 0.5
-      if change >= 10
+      if change >= EXCELLENT_NET_WORTH_GROWTH
         1.0
-      elsif change <= -10
+      elsif change <= POOR_NET_WORTH_DECLINE
         0.0
       else
-        0.5 + (change / 20.0)
+        0.5 + (change / NORMALIZATION_DIVISOR)
       end
     end
 end

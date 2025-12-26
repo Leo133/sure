@@ -1,4 +1,6 @@
 class FinancialSnapshot::Calculator
+  include FinancialHealthThresholds
+
   attr_reader :family, :date
 
   def initialize(family, date)
@@ -35,7 +37,6 @@ class FinancialSnapshot::Calculator
   def calculate_total_debt
     family.accounts
           .active
-          .joins(:accountable)
           .where(classification: "liability")
           .sum(:balance).to_d
   end
@@ -162,8 +163,7 @@ class FinancialSnapshot::Calculator
                                     .joins("INNER JOIN credit_cards ON credit_cards.id = accounts.accountable_id AND accounts.accountable_type = 'CreditCard'")
                                     .sum(:balance).to_d
 
-      # Assume minimum payment is approximately 2% of balance or $25, whichever is greater
-      [ credit_card_balances * 0.02, 25 ].max
+      [ credit_card_balances * CREDIT_CARD_MIN_PAYMENT_RATE, CREDIT_CARD_MIN_PAYMENT_FLOOR ].max
     end
 
     # Build additional metadata

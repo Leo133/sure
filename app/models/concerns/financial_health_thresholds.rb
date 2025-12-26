@@ -1,0 +1,34 @@
+module FinancialHealthThresholds
+  # Savings Rate Thresholds
+  EXCELLENT_SAVINGS_RATE = 20.0
+  GOOD_SAVINGS_RATE = 10.0
+
+  # Debt-to-Income Ratio Thresholds
+  HEALTHY_DTI_THRESHOLD = 36.0
+  MANAGEABLE_DTI_THRESHOLD = 43.0
+  HIGH_RISK_DTI_THRESHOLD = 50.0
+  DTI_NORMALIZATION_RANGE = 14.0 # HIGH_RISK_DTI_THRESHOLD - HEALTHY_DTI_THRESHOLD
+
+  # Emergency Fund Thresholds (in months)
+  STRONG_EMERGENCY_FUND_MONTHS = 6.0
+  SOLID_EMERGENCY_FUND_MONTHS = 3.0
+
+  # Net Worth Trend Thresholds (percentage change)
+  EXCELLENT_NET_WORTH_GROWTH = 10.0
+  POOR_NET_WORTH_DECLINE = -10.0
+  STABLE_NET_WORTH_THRESHOLD = -5.0
+
+  # Credit Card Payment Estimation
+  CREDIT_CARD_MIN_PAYMENT_RATE = 0.02 # 2% of balance
+  CREDIT_CARD_MIN_PAYMENT_FLOOR = 25.0 # Minimum $25
+
+  # Health Score Normalization
+  MAX_HEALTH_SCORE = 100
+  NORMALIZATION_DIVISOR = 20.0
+
+  # Health Score Weights
+  SAVINGS_RATE_WEIGHT = 0.30
+  DTI_WEIGHT = 0.30
+  EMERGENCY_FUND_WEIGHT = 0.25
+  NET_WORTH_TREND_WEIGHT = 0.15
+end

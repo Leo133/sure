@@ -1,0 +1,55 @@
+<div class="bg-container rounded-xl shadow-border-xs p-4">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-secondary text-sm font-medium uppercase"><%= t("cash_flow.upcoming.title") %></h3>
+    <%= render DS::Link.new(
+      text: t("cash_flow.upcoming.view_all"),
+      variant: "ghost",
+      size: "sm",
+      href: cash_flow_path
+    ) %>
+  </div>
+
+  <% if @alerts.any? %>
+    <% alert = @alerts.first %>
+    <div class="mb-4 p-3 rounded-lg <%= alert[:severity] == :critical ? 'bg-destructive/10' : 'bg-warning/10' %>">
+      <div class="flex items-center gap-2">
+        <%= icon(alert[:severity] == :critical ? "alert-triangle" : "alert-circle",
+            class: "w-4 h-4 #{alert[:severity] == :critical ? 'text-destructive' : 'text-warning'}") %>
+        <span class="text-sm font-medium <%= alert[:severity] == :critical ? 'text-destructive' : 'text-warning' %>">
+          <% if alert[:type] == :overdraft %>
+            <%= t("cash_flow.upcoming.overdraft_alert", days: alert[:days_until]) %>
+          <% else %>
+            <%= t("cash_flow.upcoming.low_balance_alert", days: alert[:days_until]) %>
+          <% end %>
+        </span>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @upcoming_projections.any? %>
+    <div class="space-y-2">
+      <% @upcoming_projections.first(5).each do |projection| %>
+        <div class="flex items-center justify-between py-2 border-b border-secondary/50 last:border-0">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center <%= projection[:type] == :income ? 'bg-success/10' : 'bg-destructive/10' %>">
+              <%= icon(projection[:type] == :income ? "arrow-down-left" : "arrow-up-right",
+                  class: "w-4 h-4 #{projection[:type] == :income ? 'text-success' : 'text-destructive'}") %>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-primary truncate max-w-32"><%= projection[:description] %></p>
+              <p class="text-xs text-subdued"><%= l(projection[:date], format: :short) %></p>
+            </div>
+          </div>
+          <span class="text-sm font-medium <%= projection[:type] == :income ? 'text-success' : 'text-destructive' %>">
+            <%= projection[:type] == :income ? '+' : '-' %><%= number_to_currency(projection[:amount]) %>
+          </span>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="text-center py-6">
+      <%= icon("calendar-check", class: "w-10 h-10 text-subdued mx-auto mb-2") %>
+      <p class="text-sm text-secondary"><%= t("cash_flow.upcoming.no_upcoming") %></p>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,172 @@
+<header class="flex items-center justify-between mb-6">
+  <h1 class="text-primary text-xl font-medium"><%= t(".title") %></h1>
+
+  <div class="flex items-center gap-3">
+    <%# View Mode Selector %>
+    <div class="flex items-center gap-1 bg-surface-inset rounded-lg p-1">
+      <%= link_to t(".week"), cash_flow_path(view: "week", start_date: @start_date),
+          class: "px-3 py-1.5 text-sm rounded-md transition-colors #{@view_mode == 'week' ? 'bg-container text-primary shadow-sm' : 'text-secondary hover:text-primary'}" %>
+      <%= link_to t(".month"), cash_flow_path(view: "month", start_date: @start_date),
+          class: "px-3 py-1.5 text-sm rounded-md transition-colors #{@view_mode == 'month' ? 'bg-container text-primary shadow-sm' : 'text-secondary hover:text-primary'}" %>
+    </div>
+
+    <%# Date Navigation %>
+    <div class="flex items-center gap-2">
+      <%= link_to cash_flow_path(view: @view_mode, start_date: @start_date - 1.month),
+          class: "p-2 rounded-lg hover:bg-surface-inset transition-colors" do %>
+        <%= icon("chevron-left", class: "w-5 h-5 text-secondary") %>
+      <% end %>
+      <span class="text-primary font-medium min-w-32 text-center">
+        <%= l(@start_date, format: :month_year) %>
+      </span>
+      <%= link_to cash_flow_path(view: @view_mode, start_date: @start_date + 1.month),
+          class: "p-2 rounded-lg hover:bg-surface-inset transition-colors" do %>
+        <%= icon("chevron-right", class: "w-5 h-5 text-secondary") %>
+      <% end %>
+    </div>
+  </div>
+</header>
+
+<div class="space-y-6">
+  <%# Alerts Section %>
+  <% if @alerts.any? %>
+    <section class="space-y-2">
+      <% @alerts.each do |alert| %>
+        <div class="flex items-center gap-3 p-4 rounded-xl <%= alert[:severity] == :critical ? 'bg-destructive/10 border border-destructive/20' : 'bg-warning/10 border border-warning/20' %>">
+          <%= icon(alert[:severity] == :critical ? "alert-triangle" : "alert-circle",
+              class: "w-5 h-5 #{alert[:severity] == :critical ? 'text-destructive' : 'text-warning'}") %>
+          <div class="flex-1">
+            <p class="text-sm font-medium <%= alert[:severity] == :critical ? 'text-destructive' : 'text-warning' %>">
+              <% if alert[:type] == :overdraft %>
+                <%= t(".overdraft_warning", date: l(alert[:date], format: :long)) %>
+              <% else %>
+                <%= t(".low_balance_warning", date: l(alert[:date], format: :long), balance: number_to_currency(alert[:projected_balance])) %>
+              <% end %>
+            </p>
+            <p class="text-xs text-secondary mt-0.5">
+              <%= t(".days_until", count: alert[:days_until]) %>
+            </p>
+          </div>
+        </div>
+      <% end %>
+    </section>
+  <% end %>
+
+  <%# Summary Cards %>
+  <section class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-container rounded-xl shadow-border-xs p-4">
+      <div class="flex items-center gap-2 mb-2">
+        <%= icon("wallet", class: "w-5 h-5 text-subdued") %>
+        <h3 class="text-secondary text-sm font-medium"><%= t(".current_balance") %></h3>
+      </div>
+      <p class="text-2xl font-bold text-primary">
+        <%= number_to_currency(@summary[:starting_balance]) %>
+      </p>
+    </div>
+
+    <div class="bg-container rounded-xl shadow-border-xs p-4">
+      <div class="flex items-center gap-2 mb-2">
+        <%= icon("trending-up", class: "w-5 h-5 text-success") %>
+        <h3 class="text-secondary text-sm font-medium"><%= t(".projected_income") %></h3>
+      </div>
+      <p class="text-2xl font-bold text-success">
+        +<%= number_to_currency(@summary[:total_projected_income]) %>
+      </p>
+    </div>
+
+    <div class="bg-container rounded-xl shadow-border-xs p-4">
+      <div class="flex items-center gap-2 mb-2">
+        <%= icon("trending-down", class: "w-5 h-5 text-destructive") %>
+        <h3 class="text-secondary text-sm font-medium"><%= t(".projected_expenses") %></h3>
+      </div>
+      <p class="text-2xl font-bold text-destructive">
+        -<%= number_to_currency(@summary[:total_projected_expenses]) %>
+      </p>
+    </div>
+
+    <div class="bg-container rounded-xl shadow-border-xs p-4">
+      <div class="flex items-center gap-2 mb-2">
+        <%= icon("calculator", class: "w-5 h-5 text-subdued") %>
+        <h3 class="text-secondary text-sm font-medium"><%= t(".ending_balance") %></h3>
+      </div>
+      <p class="text-2xl font-bold <%= @summary[:ending_balance] >= 0 ? 'text-primary' : 'text-destructive' %>">
+        <%= number_to_currency(@summary[:ending_balance]) %>
+      </p>
+    </div>
+  </section>
+
+  <%# Balance Projection Chart %>
+  <section class="bg-container rounded-xl shadow-border-xs p-6">
+    <h2 class="text-secondary text-sm font-medium uppercase mb-4"><%= t(".balance_projection") %></h2>
+    <div class="h-64" data-controller="cash-flow-chart" data-cash-flow-chart-data-value="<%= @balance_curve.to_json %>">
+      <canvas data-cash-flow-chart-target="canvas"></canvas>
+    </div>
+  </section>
+
+  <%# Calendar View %>
+  <section class="bg-container rounded-xl shadow-border-xs p-6">
+    <h2 class="text-secondary text-sm font-medium uppercase mb-4"><%= t(".cash_flow_calendar") %></h2>
+
+    <div class="grid grid-cols-7 gap-px bg-secondary/20 rounded-lg overflow-hidden" data-controller="cash-flow-calendar">
+      <%# Day Headers %>
+      <% %w[Sun Mon Tue Wed Thu Fri Sat].each do |day| %>
+        <div class="bg-container p-2 text-center">
+          <span class="text-xs font-medium text-secondary uppercase"><%= day %></span>
+        </div>
+      <% end %>
+
+      <%# Calendar Days %>
+      <% calendar_dates(@start_date, @end_date).each do |date| %>
+        <% day_projections = @projections_by_date[date] || [] %>
+        <% day_income = day_projections.select { |p| p[:type] == :income }.sum { |p| p[:amount].to_f } %>
+        <% day_expenses = day_projections.select { |p| p[:type] == :expense }.sum { |p| p[:amount].to_f } %>
+        <% day_net = day_income - day_expenses %>
+        <% balance_point = @balance_curve.find { |p| p[:date] == date } %>
+
+        <%= turbo_frame_tag "day_#{date}" do %>
+          <div class="bg-container p-2 min-h-24 cursor-pointer hover:bg-surface-inset transition-colors <%= date.month != @start_date.month ? 'opacity-50' : '' %>"
+               data-action="click->cash-flow-calendar#showDayDetails"
+               data-date="<%= date %>"
+               data-cash-flow-calendar-target="day">
+            <div class="flex items-start justify-between mb-1">
+              <span class="text-sm font-medium <%= date == Date.current ? 'text-primary bg-primary/10 rounded-full w-6 h-6 flex items-center justify-center' : 'text-secondary' %>">
+                <%= date.day %>
+              </span>
+              <% if day_projections.any? %>
+                <span class="text-xs px-1.5 py-0.5 rounded-full bg-surface-inset text-secondary">
+                  <%= day_projections.count %>
+                </span>
+              <% end %>
+            </div>
+
+            <% if day_projections.any? %>
+              <div class="space-y-1 mt-2">
+                <% if day_income > 0 %>
+                  <div class="text-xs text-success font-medium">
+                    +<%= number_to_currency(day_income, precision: 0) %>
+                  </div>
+                <% end %>
+                <% if day_expenses > 0 %>
+                  <div class="text-xs text-destructive font-medium">
+                    -<%= number_to_currency(day_expenses, precision: 0) %>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+
+            <% if balance_point %>
+              <div class="mt-auto pt-1 border-t border-secondary/20">
+                <span class="text-xs <%= balance_point[:balance] >= 0 ? 'text-subdued' : 'text-destructive' %>">
+                  <%= number_to_currency(balance_point[:balance], precision: 0) %>
+                </span>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </section>
+
+  <%# Day Details Modal (Turbo Frame target) %>
+  <%= turbo_frame_tag "day_details" %>
+</div>

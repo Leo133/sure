@@ -14,6 +14,7 @@ class RecurringTransaction < ApplicationRecord
   validates :amount, presence: true
   validates :currency, presence: true
   validates :expected_day_of_month, presence: true, numericality: { greater_than: 0, less_than_or_equal_to: 31 }
+  validates :confidence_score, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 1 }, allow_nil: true
   validate :merchant_or_name_present
   validate :amount_variance_consistency
 
@@ -35,6 +36,7 @@ class RecurringTransaction < ApplicationRecord
 
   scope :for_family, ->(family) { where(family: family) }
   scope :expected_soon, -> { active.where("next_expected_date <= ?", 1.month.from_now) }
+  scope :not_paused, -> { where("paused_until IS NULL OR paused_until <= ?", Date.current) }
 
   # Class methods for identification and cleanup
   # Schedules pattern identification with debounce to run after all syncs complete
@@ -303,6 +305,39 @@ class RecurringTransaction < ApplicationRecord
       amount_max: expected_amount_max,
       amount_avg: expected_amount_avg,
       has_variance: has_amount_variance?
+    )
+  end
+
+  # Check if this recurring transaction is currently paused
+  def paused?
+    paused_until.present? && paused_until > Date.current
+  end
+
+  # Pause the recurring transaction until a specific date
+  def pause_until!(date)
+    update!(paused_until: date)
+  end
+
+  # Resume the recurring transaction (unpause)
+  def resume!
+    update!(paused_until: nil)
+  end
+
+  # Update confidence score based on prediction accuracy
+  def update_confidence!(matched:)
+    current_confidence = confidence_score || 0.7
+
+    if matched
+      # Increase confidence on successful match (up to 0.95)
+      new_confidence = [ current_confidence + 0.05, 0.95 ].min
+    else
+      # Decrease confidence on miss (down to 0.3)
+      new_confidence = [ current_confidence - 0.1, 0.3 ].max
+    end
+
+    update!(
+      confidence_score: new_confidence,
+      last_matched_at: matched ? Time.current : last_matched_at
     )
   end
 

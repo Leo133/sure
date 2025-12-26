@@ -144,6 +144,13 @@ Rails.application.routes.draw do
     post :recalculate
   end
 
+  resource :cash_flow, only: [:show], controller: "cash_flow" do
+    get :balance_chart
+    get "day/:date", action: :day_details, as: :day
+    post :scenario
+    get :upcoming
+  end
+
   resources :family_merchants, only: %i[index new create edit update destroy]
 
   resources :transfers, only: %i[new create destroy show update]

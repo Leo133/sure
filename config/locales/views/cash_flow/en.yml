@@ -1,0 +1,48 @@
+---
+en:
+  cash_flow:
+    show:
+      title: Cash Flow Forecast
+      week: Week
+      month: Month
+      current_balance: Current Balance
+      projected_income: Projected Income
+      projected_expenses: Projected Expenses
+      ending_balance: Ending Balance
+      balance_projection: Balance Projection
+      cash_flow_calendar: Cash Flow Calendar
+      overdraft_warning: "Your account balance is projected to go negative on %{date}"
+      low_balance_warning: "Balance projected to drop to %{balance} on %{date}"
+      days_until:
+        one: "in %{count} day"
+        other: "in %{count} days"
+
+    balance_chart:
+      projected_balance: Projected Balance
+
+    day_details:
+      source_pending: Pending transaction
+      source_recurring: Recurring transaction
+      source_scenario: Hypothetical transaction
+      confidence: "%{value}% confidence"
+      range: "Range: %{min} - %{max}"
+      net_for_day: Net for this day
+      no_projections: No transactions projected for this day
+
+    scenario:
+      hypothetical_transaction: Hypothetical transaction
+      positive_impact: "This would increase your ending balance by $%{amount}"
+      negative_impact: "This would decrease your ending balance by $%{amount}"
+      no_impact: "This would not change your ending balance"
+
+    upcoming:
+      title: Upcoming Cash Flow
+      view_all: View All
+      overdraft_alert: "⚠️ Overdraft risk in %{days} days"
+      low_balance_alert: "⚠️ Low balance in %{days} days"
+      no_upcoming: No upcoming transactions
+
+    confidence:
+      high: "High confidence (%{percentage}%)"
+      medium: "Medium confidence (%{percentage}%)"
+      low: "Low confidence (%{percentage}%)"

@@ -40,7 +40,7 @@ class Goal < ApplicationRecord
     return true if target_date.nil?
     return false if target_date < Date.current
 
-    expected_progress >= progress_percentage ? false : true
+    progress_percentage >= expected_progress
   end
 
   # Calculate expected progress based on time elapsed
@@ -157,7 +157,9 @@ class Goal < ApplicationRecord
     def months_until_target
       return 0 if target_date.nil? || target_date <= Date.current
 
-      ((target_date.year * 12 + target_date.month) - (Date.current.year * 12 + Date.current.month)).to_f
+      # Calculate days remaining and convert to approximate months
+      days_remaining = (target_date - Date.current).to_f
+      (days_remaining / 30.0).ceil
     end
 
     def calculate_progress_for_type
@@ -187,9 +189,13 @@ class Goal < ApplicationRecord
       return current_amount if linked_account_ids.blank?
 
       # For debt payoff, progress is the reduction from original balance
-      # Start with target (original debt) and subtract current balance
+      # Debt accounts have positive balances representing the amount owed
+      # Progress = how much of the original debt has been paid off
       original_debt = target_amount
-      current_debt = linked_accounts.sum(:balance).to_d.abs
+      current_debt = linked_accounts.sum(:balance).to_d
+
+      # If current debt is negative (overpayment), treat as fully paid
+      return original_debt if current_debt <= 0
 
       [original_debt - current_debt, 0].max
     end

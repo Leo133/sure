@@ -14,7 +14,7 @@ class GoalsController < ApplicationController
     @goal = Current.family.goals.new(
       currency: Current.family.currency,
       start_date: Date.current,
-      color: Goal::COLORS&.sample || "#3B82F6"
+      color: "#3B82F6"
     )
   end
 

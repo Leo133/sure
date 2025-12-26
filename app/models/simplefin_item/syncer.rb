@@ -45,18 +45,20 @@ class SimplefinItem::Syncer
       return
     end
 
-    # Full sync path
+    # Phase 1: Import data from SimpleFIN API
     sync.update!(status_text: "Importing accounts from SimpleFin...") if sync.respond_to?(:status_text)
     simplefin_item.import_latest_simplefin_data(sync: sync)
 
+    # Phase 2: Check account setup status and collect sync statistics
     finalize_setup_counts(sync)
 
-    # Process transactions/holdings only for linked accounts
+    # Phase 3: Process transactions for linked accounts only
     linked_accounts = simplefin_item.simplefin_accounts.joins(:account)
     if linked_accounts.any?
       sync.update!(status_text: "Processing transactions and holdings...") if sync.respond_to?(:status_text)
       simplefin_item.process_accounts
 
+      # Phase 4: Schedule balance calculations for linked accounts
       sync.update!(status_text: "Calculating balances...") if sync.respond_to?(:status_text)
       simplefin_item.schedule_account_syncs(
         parent_sync: sync,

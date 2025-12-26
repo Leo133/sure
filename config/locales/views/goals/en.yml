@@ -1,0 +1,81 @@
+---
+en:
+  goals:
+    goal_types:
+      savings: Savings Goal
+      debt_payoff: Debt Payoff
+      net_worth: Net Worth Target
+      emergency_fund: Emergency Fund
+      custom: Custom Goal
+    index:
+      title: Goals
+      new: New Goal
+      active_goals: Active Goals
+      completed_goals: Completed Goals
+      empty: No goals yet
+      empty_description: Set a financial goal to track your progress toward savings, debt payoff, or other targets.
+    goal:
+      days_remaining:
+        one: "%{count} day left"
+        other: "%{count} days left"
+      monthly_needed: "%{amount}/mo needed"
+      status:
+        completed: Completed
+        on_track: On Track
+        behind: Behind
+    new:
+      title: New Goal
+    edit:
+      title: Edit Goal
+    form:
+      name_label: Goal Name
+      name_placeholder: e.g., Emergency Fund, Pay off Credit Card
+      goal_type_label: Goal Type
+      target_amount_label: Target Amount
+      currency_label: Currency
+      start_date_label: Start Date
+      target_date_label: Target Date
+      description_label: Description
+      description_placeholder: Add notes about this goal...
+      linked_accounts_label: Link Accounts
+      linked_accounts_hint: Progress will be calculated from the balance of linked accounts
+      advanced_options: Advanced Options
+      color_label: Color
+      icon_label: Icon
+      create: Create Goal
+      update: Update Goal
+      delete: Delete Goal
+      delete_confirm: Are you sure you want to delete this goal?
+    show:
+      edit: Edit
+      progress: Progress
+      of_target: of %{target}
+      complete: complete
+      days_remaining:
+        one: "%{count} day remaining"
+        other: "%{count} days remaining"
+      milestones: Milestones
+      description: Description
+      details: Details
+      start_date: Start Date
+      target_date: Target Date
+      monthly_contribution: Monthly Contribution Needed
+      linked_accounts: Linked Accounts
+      contributions: Contributions
+      add_contribution: Add Contribution
+      contribution_amount: Amount
+      contribution_notes: Notes
+      contribution_notes_placeholder: Optional notes about this contribution
+      no_contributions: No contributions yet
+      status:
+        completed: Completed
+        on_track: On Track
+        behind: Behind Schedule
+    create:
+      created: Goal created successfully
+    update:
+      updated: Goal updated successfully
+    destroy:
+      deleted: Goal deleted successfully
+    add_contribution:
+      contribution_added: Contribution added successfully

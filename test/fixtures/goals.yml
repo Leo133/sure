@@ -1,0 +1,45 @@
+savings_goal:
+  family: dylan_family
+  name: Emergency Fund
+  goal_type: savings
+  target_amount: 10000
+  current_amount: 2500
+  currency: USD
+  status: active
+  start_date: <%= 30.days.ago.to_date %>
+  target_date: <%= 1.year.from_now.to_date %>
+  color: "#3B82F6"
+  lucide_icon: "shield"
+  milestones: [{"percentage": 25, "reached_at": "<%= 10.days.ago.iso8601 %>"}, {"percentage": 50, "reached_at": null}, {"percentage": 75, "reached_at": null}, {"percentage": 100, "reached_at": null}]
+  linked_account_ids: []
+
+debt_payoff_goal:
+  family: dylan_family
+  name: Pay Off Credit Card
+  goal_type: debt_payoff
+  target_amount: 5000
+  current_amount: 1500
+  currency: USD
+  status: active
+  start_date: <%= 60.days.ago.to_date %>
+  target_date: <%= 6.months.from_now.to_date %>
+  color: "#EF4444"
+  lucide_icon: "credit-card"
+  milestones: [{"percentage": 25, "reached_at": "<%= 20.days.ago.iso8601 %>"}, {"percentage": 50, "reached_at": null}, {"percentage": 75, "reached_at": null}, {"percentage": 100, "reached_at": null}]
+  linked_account_ids: []
+
+completed_goal:
+  family: dylan_family
+  name: New Laptop
+  goal_type: custom
+  target_amount: 2000
+  current_amount: 2000
+  currency: USD
+  status: completed
+  start_date: <%= 6.months.ago.to_date %>
+  target_date: <%= 1.month.ago.to_date %>
+  completed_at: <%= 1.month.ago %>
+  color: "#10B981"
+  lucide_icon: "laptop"
+  milestones: [{"percentage": 25, "reached_at": "<%= 5.months.ago.iso8601 %>"}, {"percentage": 50, "reached_at": "<%= 4.months.ago.iso8601 %>"}, {"percentage": 75, "reached_at": "<%= 2.months.ago.iso8601 %>"}, {"percentage": 100, "reached_at": "<%= 1.month.ago.iso8601 %>"}]
+  linked_account_ids: []

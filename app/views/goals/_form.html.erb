@@ -1,0 +1,111 @@
+<%= styled_form_with model: goal, class: "space-y-4", data: { turbo_frame: :_top } do |f| %>
+  <section class="space-y-4">
+    <div>
+      <%= f.text_field :name,
+        label: t(".name_label"),
+        placeholder: t(".name_placeholder"),
+        autofocus: true,
+        required: true %>
+    </div>
+
+    <div>
+      <%= f.select :goal_type,
+        Goal::GOAL_TYPES.map { |type| [t("goals.goal_types.#{type}"), type] },
+        { label: t(".goal_type_label") },
+        { required: true } %>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <%= f.money_field :target_amount,
+          label: t(".target_amount_label"),
+          required: true,
+          min: 0,
+          step: 0.01 %>
+      </div>
+
+      <div>
+        <%= f.select :currency,
+          Money::Currency.popular.map { |c| ["#{c.iso_code} - #{c.name}", c.iso_code] },
+          { label: t(".currency_label") },
+          { required: true } %>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <%= f.date_field :start_date,
+          label: t(".start_date_label") %>
+      </div>
+
+      <div>
+        <%= f.date_field :target_date,
+          label: t(".target_date_label") %>
+      </div>
+    </div>
+
+    <div>
+      <%= f.text_area :description,
+        label: t(".description_label"),
+        placeholder: t(".description_placeholder"),
+        rows: 3 %>
+    </div>
+
+    <% if goal.goal_type_savings? || goal.goal_type_debt_payoff? || goal.goal_type_emergency_fund? %>
+      <div>
+        <label class="block text-sm font-medium text-primary mb-2"><%= t(".linked_accounts_label") %></label>
+        <div class="space-y-2 max-h-48 overflow-y-auto bg-container-inset rounded-lg p-3">
+          <% Current.family.accounts.visible.order(:name).each do |account| %>
+            <label class="flex items-center gap-3 p-2 hover:bg-container-hover rounded-lg cursor-pointer">
+              <%= f.check_box :linked_account_ids,
+                { multiple: true, checked: goal.linked_account_ids&.include?(account.id.to_s) },
+                account.id, nil %>
+              <span class="text-sm text-primary"><%= account.name %></span>
+              <span class="text-xs text-subdued ml-auto"><%= format_money(account.balance_money) %></span>
+            </label>
+          <% end %>
+        </div>
+        <p class="text-xs text-subdued mt-1"><%= t(".linked_accounts_hint") %></p>
+      </div>
+    <% end %>
+
+    <details class="group">
+      <summary class="flex items-center gap-2 text-sm text-secondary cursor-pointer">
+        <%= icon("settings", class: "w-4 h-4") %>
+        <%= t(".advanced_options") %>
+        <%= icon("chevron-down", class: "w-4 h-4 ml-auto group-open:rotate-180 transition-transform") %>
+      </summary>
+
+      <div class="mt-4 space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <%= f.text_field :color,
+              label: t(".color_label"),
+              type: "color",
+              value: goal.color || "#3B82F6" %>
+          </div>
+
+          <div>
+            <%= f.text_field :lucide_icon,
+              label: t(".icon_label"),
+              placeholder: "target" %>
+          </div>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="flex items-center justify-end gap-2 pt-4 border-t border-primary">
+    <% if goal.persisted? %>
+      <%= render DS::Link.new(
+        text: t(".delete"),
+        variant: "destructive",
+        href: goal_path(goal),
+        method: :delete,
+        confirm: t(".delete_confirm")
+      ) %>
+    <% end %>
+
+    <%= f.submit goal.persisted? ? t(".update") : t(".create") %>
+  </section>
+<% end %>

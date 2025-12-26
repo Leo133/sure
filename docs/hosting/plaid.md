@@ -1,11 +1,11 @@
+# Setting Up Plaid
+
 > [!WARNING]
 > Plaid integration currently only works for Western users. Plaid Production support is not available to European users.
 
 > [!NOTE]
 > For Plaid integration your Sure instance needs to be accessible by the internet behind a domain with working SSL.
 > See additional context in [maybe-finance/maybe#2419](https://github.com/maybe-finance/maybe/pull/2419).
-
-# Setting Up Plaid
 
 ## 1. Create Your Plaid Account
 
@@ -31,6 +31,7 @@ Go to [https://dashboard.plaid.com](https://dashboard.plaid.com) and register fo
 
 > [!NOTE]
 > Per Plaid Support as of July 2025, certain banks are seeing extended OAuth approval timelines.
+>
 > - Chase Bank: there have been some additional delays, resulting in an updated wait time of roughly 3-4 months
 > - Schwab: the manual review process by Schwab can take up to two months to be completed
 
@@ -48,8 +49,7 @@ Go to [https://dashboard.plaid.com](https://dashboard.plaid.com) and register fo
 11. Enter any name for your application.
 12. Upload any photo as the logo (must be 1024x1024px and under 4MB).
 13. Leave the brand color as **#22CCEE**.
-14. Set the Website URL to:  
-    https://github.com/we-promise/sure
+14. Set the Website URL to: <https://github.com/we-promise/sure>
 15. In the "Reason for data access" box, enter:  
     This is for personal use only on a self-hosted version of the Sure Finance software. I am only using it to manage my finances, sync my bank accounts, track my spending, and create a budget.
 16. Enter your real email address as the support email.
@@ -78,25 +78,30 @@ Go to [https://dashboard.plaid.com](https://dashboard.plaid.com) and register fo
 
 ---
 
-# Setting Up Sure to Use Plaid
+## Configuring Sure to Use Plaid
 
 1. After your Plaid account is registered, go to [https://dashboard.plaid.com/developers/api](https://dashboard.plaid.com/developers/api) or click **Developers > API** in the sidebar, then click **Configure** next to Allowed redirect URIs.
 2. Click **Add new URI**, type your domain, and add `/accounts` at the end (for example: `https://budget.yourdomain.com/accounts`).
 3. Click **Save changes**.
 4. Go to [https://dashboard.plaid.com/developers/keys](https://dashboard.plaid.com/developers/keys) or click **Developers > Keys** in the sidebar.
 5. Copy your `client_id` and `secret` keys. Use the "Production" secret key.
+
 6. In your `docker-compose` file, below the `OPENAI_ACCESS_TOKEN: ${OPENAI_ACCESS_TOKEN}` line, add these lines:
-```
-PLAID_CLIENT_ID: ${PLAID_CLIENT_ID}
-PLAID_SECRET: ${PLAID_SECRET}
-PLAID_ENV: ${PLAID_ENV}
-```
+
+   ```yaml
+   PLAID_CLIENT_ID: ${PLAID_CLIENT_ID}
+   PLAID_SECRET: ${PLAID_SECRET}
+   PLAID_ENV: ${PLAID_ENV}
+   ```
+
 7. In your `.env` file (next to your `docker-compose` file), add these lines:
-```
-   PLAID_CLIENT_ID: ENTER_CLIENT_ID_FROM_PLAID_HERE  
-   PLAID_SECRET: ENTER_SECRET_KEY_FROM_PLAID_HERE  
-   PLAID_ENV: production  # (use 'production' for Full/Limited Production Access, or 'sandbox' for Sandbox Access)
-```
+
+   ```bash
+   PLAID_CLIENT_ID=ENTER_CLIENT_ID_FROM_PLAID_HERE
+   PLAID_SECRET=ENTER_SECRET_KEY_FROM_PLAID_HERE
+   PLAID_ENV=production  # (use 'production' for Full/Limited Production Access, or 'sandbox' for Sandbox Access)
+   ```
+
 8. Restart Sure.
 
 ---

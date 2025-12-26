@@ -35,6 +35,7 @@ class Family < ApplicationRecord
   has_many :budget_categories, through: :budgets
 
   has_many :goals, dependent: :destroy
+  has_many :financial_snapshots, dependent: :destroy
 
   has_many :llm_usages, dependent: :destroy
   has_many :recurring_transactions, dependent: :destroy
@@ -125,5 +126,15 @@ class Family < ApplicationRecord
 
   def self_hoster?
     Rails.application.config.app_mode.self_hosted?
+  end
+
+  # Real-time financial health metrics
+  def financial_health
+    @financial_health ||= FinancialHealth.new(self)
+  end
+
+  # Get the latest financial snapshot or calculate current metrics
+  def latest_financial_snapshot
+    financial_snapshots.recent.first
   end
 end

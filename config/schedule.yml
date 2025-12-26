@@ -24,3 +24,9 @@ sync_all_accounts:
   class: "SyncAllJob"
   queue: "scheduled"
   description: "Syncs all accounts for all families"
+
+generate_financial_snapshots:
+  cron: "0 3 1 * *" # 3:00 AM on the 1st of every month
+  class: "FinancialSnapshotJob"
+  queue: "scheduled"
+  description: "Generates monthly financial health snapshots for all families"

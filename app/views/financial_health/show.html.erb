@@ -1,0 +1,168 @@
+<header class="flex items-center justify-between mb-6">
+  <h1 class="text-primary text-xl font-medium"><%= t(".title") %></h1>
+
+  <div class="flex items-center gap-2">
+    <%= render DS::Link.new(
+      text: t(".export"),
+      variant: "outline",
+      href: export_financial_health_path(format: :csv),
+      icon: "download"
+    ) %>
+  </div>
+</header>
+
+<div class="space-y-6">
+  <%# Health Score Overview %>
+  <section class="bg-container rounded-xl shadow-border-xs p-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div>
+        <h2 class="text-secondary text-sm font-medium uppercase mb-2"><%= t(".health_score") %></h2>
+        <div class="flex items-center gap-3">
+          <% if @health_score.present? %>
+            <span class="text-4xl font-bold <%= health_score_color(@health_score) %>"><%= @health_score %></span>
+            <span class="text-secondary text-lg"><%= t(".out_of_100") %></span>
+          <% else %>
+            <span class="text-secondary text-lg"><%= t(".insufficient_data") %></span>
+          <% end %>
+        </div>
+      </div>
+
+      <% if @health_score.present? %>
+        <div class="flex items-center gap-2">
+          <span class="px-3 py-1 rounded-full text-sm font-medium <%= health_score_badge_class(@health_score) %>">
+            <%= health_score_label(@health_score) %>
+          </span>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+  <%# Key Metrics Cards %>
+  <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <%# Savings Rate %>
+    <div class="bg-container rounded-xl shadow-border-xs p-4">
+      <div class="flex items-center gap-2 mb-2">
+        <%= icon("piggy-bank", class: "w-5 h-5 text-subdued") %>
+        <h3 class="text-secondary text-sm font-medium"><%= t(".savings_rate") %></h3>
+      </div>
+      <div class="flex items-baseline gap-1">
+        <% if @current_metrics[:savings_rate][:value].present? %>
+          <span class="text-2xl font-bold <%= metric_status_color(@current_metrics[:savings_rate][:status]) %>">
+            <%= number_to_percentage(@current_metrics[:savings_rate][:value], precision: 1) %>
+          </span>
+        <% else %>
+          <span class="text-secondary">—</span>
+        <% end %>
+      </div>
+      <p class="text-xs text-subdued mt-1"><%= t(".savings_rate_description") %></p>
+    </div>
+
+    <%# Debt-to-Income %>
+    <div class="bg-container rounded-xl shadow-border-xs p-4">
+      <div class="flex items-center gap-2 mb-2">
+        <%= icon("scale", class: "w-5 h-5 text-subdued") %>
+        <h3 class="text-secondary text-sm font-medium"><%= t(".debt_to_income") %></h3>
+      </div>
+      <div class="flex items-baseline gap-1">
+        <% if @current_metrics[:debt_to_income][:value].present? %>
+          <span class="text-2xl font-bold <%= metric_status_color(@current_metrics[:debt_to_income][:status]) %>">
+            <%= number_to_percentage(@current_metrics[:debt_to_income][:value], precision: 1) %>
+          </span>
+        <% else %>
+          <span class="text-secondary">—</span>
+        <% end %>
+      </div>
+      <p class="text-xs text-subdued mt-1"><%= t(".debt_to_income_description") %></p>
+    </div>
+
+    <%# Emergency Fund %>
+    <div class="bg-container rounded-xl shadow-border-xs p-4">
+      <div class="flex items-center gap-2 mb-2">
+        <%= icon("shield-check", class: "w-5 h-5 text-subdued") %>
+        <h3 class="text-secondary text-sm font-medium"><%= t(".emergency_fund") %></h3>
+      </div>
+      <div class="flex items-baseline gap-1">
+        <% if @current_metrics[:emergency_fund][:value].present? %>
+          <span class="text-2xl font-bold <%= metric_status_color(@current_metrics[:emergency_fund][:status]) %>">
+            <%= number_with_precision(@current_metrics[:emergency_fund][:value], precision: 1) %>
+          </span>
+          <span class="text-secondary text-sm"><%= t(".months") %></span>
+        <% else %>
+          <span class="text-secondary">—</span>
+        <% end %>
+      </div>
+      <p class="text-xs text-subdued mt-1"><%= t(".emergency_fund_description") %></p>
+    </div>
+
+    <%# Net Worth Trend %>
+    <div class="bg-container rounded-xl shadow-border-xs p-4">
+      <div class="flex items-center gap-2 mb-2">
+        <%= icon("trending-up", class: "w-5 h-5 text-subdued") %>
+        <h3 class="text-secondary text-sm font-medium"><%= t(".net_worth_trend") %></h3>
+      </div>
+      <div class="flex items-baseline gap-1">
+        <% if @current_metrics[:net_worth_trend][:value].present? %>
+          <span class="text-2xl font-bold <%= metric_status_color(@current_metrics[:net_worth_trend][:status]) %>">
+            <%= @current_metrics[:net_worth_trend][:value][:percentage] >= 0 ? "+" : "" %><%= number_to_percentage(@current_metrics[:net_worth_trend][:value][:percentage], precision: 1) %>
+          </span>
+        <% else %>
+          <span class="text-secondary">—</span>
+        <% end %>
+      </div>
+      <p class="text-xs text-subdued mt-1"><%= t(".net_worth_trend_description") %></p>
+    </div>
+  </section>
+
+  <%# Insights Section %>
+  <section class="bg-container rounded-xl shadow-border-xs p-6">
+    <h2 class="text-secondary text-sm font-medium uppercase mb-4"><%= t(".insights") %></h2>
+    <div class="space-y-3">
+      <% insight_for_metrics(@current_metrics).each do |insight| %>
+        <div class="flex items-start gap-3 p-3 rounded-lg bg-surface-inset">
+          <%= icon(insight[:icon], class: "w-5 h-5 mt-0.5 #{insight[:color]}") %>
+          <div>
+            <p class="text-primary text-sm font-medium"><%= insight[:title] %></p>
+            <p class="text-secondary text-sm"><%= insight[:description] %></p>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </section>
+
+  <%# Historical Snapshots %>
+  <% if @historical_snapshots.any? %>
+    <section class="bg-container rounded-xl shadow-border-xs p-6">
+      <h2 class="text-secondary text-sm font-medium uppercase mb-4"><%= t(".historical_data") %></h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full">
+          <thead>
+            <tr class="border-b border-secondary">
+              <th class="text-left text-xs font-medium text-secondary uppercase py-2 px-3"><%= t(".date") %></th>
+              <th class="text-right text-xs font-medium text-secondary uppercase py-2 px-3"><%= t(".net_worth") %></th>
+              <th class="text-right text-xs font-medium text-secondary uppercase py-2 px-3"><%= t(".savings_rate") %></th>
+              <th class="text-right text-xs font-medium text-secondary uppercase py-2 px-3"><%= t(".debt_to_income") %></th>
+              <th class="text-right text-xs font-medium text-secondary uppercase py-2 px-3"><%= t(".emergency_fund") %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @historical_snapshots.each do |snapshot| %>
+              <tr class="border-b border-secondary last:border-0">
+                <td class="text-primary text-sm py-3 px-3"><%= l(snapshot.snapshot_date, format: :long) %></td>
+                <td class="text-primary text-sm text-right py-3 px-3"><%= format_money(snapshot.net_worth_money) %></td>
+                <td class="text-primary text-sm text-right py-3 px-3">
+                  <%= snapshot.savings_rate.present? ? number_to_percentage(snapshot.savings_rate, precision: 1) : "—" %>
+                </td>
+                <td class="text-primary text-sm text-right py-3 px-3">
+                  <%= snapshot.debt_to_income_ratio.present? ? number_to_percentage(snapshot.debt_to_income_ratio, precision: 1) : "—" %>
+                </td>
+                <td class="text-primary text-sm text-right py-3 px-3">
+                  <%= snapshot.emergency_fund_months.present? ? "#{number_with_precision(snapshot.emergency_fund_months, precision: 1)} #{t('.months')}" : "—" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  <% end %>
+</div>

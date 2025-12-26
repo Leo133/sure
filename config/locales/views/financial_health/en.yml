@@ -1,0 +1,79 @@
+---
+en:
+  financial_health:
+    show:
+      title: Financial Health
+      health_score: Health Score
+      out_of_100: "/ 100"
+      insufficient_data: Insufficient data to calculate health score
+      export: Export
+      excellent: Excellent
+      good: Good
+      fair: Fair
+      needs_attention: Needs Attention
+      unknown: Unknown
+
+      # Metric Labels
+      savings_rate: Savings Rate
+      savings_rate_description: Percentage of income saved this month
+      debt_to_income: Debt-to-Income
+      debt_to_income_description: Monthly debt payments vs. income
+      emergency_fund: Emergency Fund
+      emergency_fund_description: Months of expenses covered by liquid savings
+      net_worth_trend: Net Worth Trend
+      net_worth_trend_description: Change from previous month
+      months: months
+
+      # Sections
+      insights: Insights & Recommendations
+      historical_data: Historical Data
+      date: Date
+      net_worth: Net Worth
+
+    recalculate:
+      recalculated: Financial health metrics recalculated successfully
+
+    insights:
+      savings_rate:
+        excellent:
+          title: Excellent savings rate
+          description: "You're saving 20% or more of your income. Keep up the great work building your wealth!"
+        good:
+          title: Good savings habit
+          description: "You're on the right track! Try to increase your savings rate by 1-2% each quarter."
+        low:
+          title: Low savings rate
+          description: "Consider reviewing your budget to find opportunities to save more of your income."
+      
+      debt_to_income:
+        healthy:
+          title: Healthy debt levels
+          description: "Your debt-to-income ratio is under 36%. You have good borrowing capacity if needed."
+        manageable:
+          title: Manageable debt
+          description: "Consider paying extra on high-interest debts to reduce your overall debt burden."
+        high:
+          title: High debt burden
+          description: "Prioritize debt reduction strategies. Consider consolidating high-interest debts."
+      
+      emergency_fund:
+        strong:
+          title: Strong safety net
+          description: "You have 6+ months of expenses saved. Consider optimizing cash vs. investments."
+        solid:
+          title: Solid emergency fund
+          description: "You're on track! Keep building toward 6 months of expenses."
+        low:
+          title: Build your emergency fund
+          description: "Focus on building your emergency fund to cover 3-6 months of expenses."
+      
+      net_worth:
+        growing:
+          title: Net worth growing
+          description: "Your net worth increased by %{percentage}% from last month. Keep it up!"
+        stable:
+          title: Net worth stable
+          description: "Your net worth is holding steady. Focus on growing assets or reducing liabilities."
+        declining:
+          title: Net worth declining
+          description: "Your net worth decreased by %{percentage}% from last month. Review your spending."

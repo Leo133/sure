@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_12_26_032622) do
+ActiveRecord::Schema[7.2].define(version: 2025_12_26_040307) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -420,6 +420,27 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_26_032622) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["family_id"], name: "index_family_exports_on_family_id"
+  end
+
+  create_table "financial_snapshots", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "family_id", null: false
+    t.date "snapshot_date", null: false
+    t.decimal "net_worth", precision: 19, scale: 4
+    t.decimal "liquid_assets", precision: 19, scale: 4
+    t.decimal "total_debt", precision: 19, scale: 4
+    t.decimal "monthly_income", precision: 19, scale: 4
+    t.decimal "monthly_expenses", precision: 19, scale: 4
+    t.decimal "monthly_savings", precision: 19, scale: 4
+    t.decimal "savings_rate", precision: 7, scale: 4
+    t.decimal "debt_to_income_ratio", precision: 7, scale: 4
+    t.decimal "emergency_fund_months", precision: 5, scale: 2
+    t.string "currency", null: false
+    t.jsonb "metadata", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["family_id", "snapshot_date"], name: "index_financial_snapshots_on_family_id_and_snapshot_date", unique: true
+    t.index ["family_id"], name: "index_financial_snapshots_on_family_id"
+    t.index ["snapshot_date"], name: "index_financial_snapshots_on_snapshot_date"
   end
 
   create_table "goal_contributions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1218,6 +1239,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_26_032622) do
   add_foreign_key "eval_runs", "eval_datasets"
   add_foreign_key "eval_samples", "eval_datasets"
   add_foreign_key "family_exports", "families"
+  add_foreign_key "financial_snapshots", "families"
   add_foreign_key "goal_contributions", "goals"
   add_foreign_key "goal_contributions", "transactions"
   add_foreign_key "goals", "families"

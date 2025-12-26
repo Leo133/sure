@@ -139,6 +139,11 @@ Rails.application.routes.draw do
     end
   end
 
+  resource :financial_health, only: [:show], controller: "financial_health" do
+    get :export
+    post :recalculate
+  end
+
   resources :family_merchants, only: %i[index new create edit update destroy]
 
   resources :transfers, only: %i[new create destroy show update]

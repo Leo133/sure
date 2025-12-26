@@ -58,8 +58,9 @@ module CashFlow
         day_projections = projections_by_date[date] || []
 
         # Calculate net change for the day
+        # Income increases balance (+), expenses decrease balance (-)
         day_net = day_projections.sum do |p|
-          p[:type] == :income ? -p[:amount].to_d : p[:amount].to_d
+          p[:type] == :income ? p[:amount].to_d : -p[:amount].to_d
         end
 
         current_balance += day_net
@@ -196,8 +197,8 @@ module CashFlow
         projections = []
 
         active_recurring_transactions.each do |recurring|
-          # Skip paused recurring transactions
-          next if recurring.paused_until.present? && recurring.paused_until > Date.current
+          # Skip paused recurring transactions (use the model's paused? method)
+          next if recurring.paused?
 
           # Generate projections for each expected occurrence within the date range
           occurrence_dates(recurring).each do |date|
@@ -334,8 +335,9 @@ module CashFlow
         (start_date..end_date).each do |date|
           day_projections = projections_by_date[date] || []
 
+          # Income increases balance (+), expenses decrease balance (-)
           day_net = day_projections.sum do |p|
-            p[:type] == :income ? -p[:amount].to_d : p[:amount].to_d
+            p[:type] == :income ? p[:amount].to_d : -p[:amount].to_d
           end
 
           current_balance += day_net

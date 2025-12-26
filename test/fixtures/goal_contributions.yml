@@ -1,0 +1,15 @@
+manual_contribution:
+  goal: completed_goal
+  amount: 500
+  currency: USD
+  contribution_date: <%= 3.months.ago.to_date %>
+  contribution_type: manual
+  notes: Birthday money saved
+
+second_contribution:
+  goal: completed_goal
+  amount: 250
+  currency: USD
+  contribution_date: <%= 2.months.ago.to_date %>
+  contribution_type: manual
+  notes: Tax refund

@@ -1,0 +1,209 @@
+<header class="flex items-center justify-between mb-6">
+  <div class="flex items-center gap-4">
+    <%= link_to goals_path, class: "text-secondary hover:text-primary" do %>
+      <%= icon("arrow-left", class: "w-5 h-5") %>
+    <% end %>
+
+    <div class="flex items-center gap-3">
+      <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background-color: <%= @goal.color || '#3B82F6' %>20">
+        <%= icon(@goal.lucide_icon || "target", class: "w-6 h-6", style: "color: #{@goal.color || '#3B82F6'}") %>
+      </div>
+      <div>
+        <h1 class="text-primary text-xl font-medium"><%= @goal.name %></h1>
+        <p class="text-sm text-secondary"><%= t("goals.goal_types.#{@goal.goal_type}") %></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <%= render DS::Link.new(
+      text: t(".edit"),
+      variant: "secondary",
+      href: edit_goal_path(@goal),
+      icon: "pencil",
+      frame: :modal
+    ) %>
+  </div>
+</header>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="lg:col-span-2 space-y-6">
+    <section class="bg-container rounded-xl shadow-border-xs p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-primary font-medium"><%= t(".progress") %></h2>
+        <% case @goal.tracking_status %>
+        <% when "completed" %>
+          <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-success/10 text-success">
+            <%= icon("check", class: "w-4 h-4") %>
+            <%= t(".status.completed") %>
+          </span>
+        <% when "on_track" %>
+          <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-success/10 text-success">
+            <%= t(".status.on_track") %>
+          </span>
+        <% when "behind" %>
+          <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-warning/10 text-warning">
+            <%= icon("alert-triangle", class: "w-4 h-4") %>
+            <%= t(".status.behind") %>
+          </span>
+        <% end %>
+      </div>
+
+      <div class="text-center mb-6">
+        <p class="text-4xl font-bold text-primary">
+          <%= format_money(Money.new(@goal.current_amount, @goal.currency)) %>
+        </p>
+        <p class="text-secondary">
+          <%= t(".of_target", target: format_money(Money.new(@goal.target_amount, @goal.currency))) %>
+        </p>
+      </div>
+
+      <div class="space-y-2">
+        <div class="relative h-4 bg-container-inset rounded-full overflow-hidden">
+          <div
+            class="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
+            style="width: <%= [@goal.progress_percentage, 100].min %>%; background-color: <%= @goal.color || '#3B82F6' %>"
+          ></div>
+
+          <% @goal.milestones&.each do |milestone| %>
+            <div
+              class="absolute top-1/2 -translate-y-1/2 w-0.5 h-6 <%= milestone['reached_at'].present? ? 'bg-white' : 'bg-secondary' %>"
+              style="left: <%= milestone['percentage'] %>%"
+            ></div>
+          <% end %>
+        </div>
+
+        <div class="flex items-center justify-between text-sm">
+          <span class="text-secondary"><%= @goal.progress_percentage.round(1) %>% <%= t(".complete") %></span>
+          <% if @goal.days_remaining %>
+            <span class="text-secondary"><%= t(".days_remaining", count: @goal.days_remaining) %></span>
+          <% end %>
+        </div>
+      </div>
+
+      <% if @goal.milestones&.any? %>
+        <div class="mt-6 pt-6 border-t border-primary">
+          <h3 class="text-sm font-medium text-primary mb-3"><%= t(".milestones") %></h3>
+          <div class="grid grid-cols-4 gap-2">
+            <% @goal.milestones.each do |milestone| %>
+              <div class="text-center p-2 rounded-lg <%= milestone['reached_at'].present? ? 'bg-success/10' : 'bg-container-inset' %>">
+                <p class="text-lg font-medium <%= milestone['reached_at'].present? ? 'text-success' : 'text-secondary' %>">
+                  <%= milestone['percentage'] %>%
+                </p>
+                <% if milestone['reached_at'].present? %>
+                  <%= icon("check", class: "w-4 h-4 text-success mx-auto") %>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </section>
+
+    <% if @goal.description.present? %>
+      <section class="bg-container rounded-xl shadow-border-xs p-6">
+        <h2 class="text-primary font-medium mb-3"><%= t(".description") %></h2>
+        <p class="text-secondary whitespace-pre-wrap"><%= @goal.description %></p>
+      </section>
+    <% end %>
+  </div>
+
+  <div class="space-y-6">
+    <section class="bg-container rounded-xl shadow-border-xs p-6">
+      <h2 class="text-primary font-medium mb-4"><%= t(".details") %></h2>
+
+      <dl class="space-y-4">
+        <% if @goal.start_date %>
+          <div class="flex justify-between">
+            <dt class="text-secondary"><%= t(".start_date") %></dt>
+            <dd class="text-primary"><%= l(@goal.start_date, format: :long) %></dd>
+          </div>
+        <% end %>
+
+        <% if @goal.target_date %>
+          <div class="flex justify-between">
+            <dt class="text-secondary"><%= t(".target_date") %></dt>
+            <dd class="text-primary"><%= l(@goal.target_date, format: :long) %></dd>
+          </div>
+        <% end %>
+
+        <% if @goal.required_monthly_contribution && @goal.required_monthly_contribution > 0 %>
+          <div class="flex justify-between">
+            <dt class="text-secondary"><%= t(".monthly_contribution") %></dt>
+            <dd class="text-primary font-medium">
+              <%= format_money(Money.new(@goal.required_monthly_contribution, @goal.currency)) %>
+            </dd>
+          </div>
+        <% end %>
+
+        <% if @goal.linked_accounts.any? %>
+          <div>
+            <dt class="text-secondary mb-2"><%= t(".linked_accounts") %></dt>
+            <dd class="space-y-2">
+              <% @goal.linked_accounts.each do |account| %>
+                <%= link_to account_path(account), class: "flex items-center justify-between p-2 bg-container-inset rounded-lg hover:bg-container-hover" do %>
+                  <span class="text-sm text-primary"><%= account.name %></span>
+                  <span class="text-xs text-subdued"><%= format_money(account.balance_money) %></span>
+                <% end %>
+              <% end %>
+            </dd>
+          </div>
+        <% end %>
+      </dl>
+    </section>
+
+    <% if @goal.goal_type_custom? %>
+      <section class="bg-container rounded-xl shadow-border-xs p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-primary font-medium"><%= t(".contributions") %></h2>
+          <%= render DS::Link.new(
+            text: t(".add_contribution"),
+            variant: "secondary",
+            href: "#contribution-form",
+            icon: "plus",
+            size: :small
+          ) %>
+        </div>
+
+        <div id="contribution-form" class="mb-4 p-4 bg-container-inset rounded-lg">
+          <%= styled_form_with url: add_contribution_goal_path(@goal), method: :post, class: "space-y-3" do |f| %>
+            <div>
+              <%= f.money_field :amount,
+                label: t(".contribution_amount"),
+                required: true,
+                min: 0,
+                step: 0.01 %>
+            </div>
+            <div>
+              <%= f.text_area :notes,
+                label: t(".contribution_notes"),
+                placeholder: t(".contribution_notes_placeholder"),
+                rows: 2 %>
+            </div>
+            <%= f.submit t(".add_contribution"), class: "w-full" %>
+          <% end %>
+        </div>
+
+        <% if @contributions.any? %>
+          <div class="space-y-2">
+            <% @contributions.each do |contribution| %>
+              <div class="flex items-center justify-between p-2 bg-container-inset rounded-lg">
+                <div>
+                  <p class="text-sm text-primary font-medium">
+                    +<%= format_money(Money.new(contribution.amount, contribution.currency)) %>
+                  </p>
+                  <p class="text-xs text-subdued"><%= l(contribution.contribution_date, format: :short) %></p>
+                </div>
+                <% if contribution.notes.present? %>
+                  <p class="text-xs text-secondary truncate max-w-32"><%= contribution.notes %></p>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="text-sm text-subdued text-center py-4"><%= t(".no_contributions") %></p>
+        <% end %>
+      </section>
+    <% end %>
+  </div>
+</div>

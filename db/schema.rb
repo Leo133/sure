@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_12_15_100443) do
+ActiveRecord::Schema[7.2].define(version: 2025_12_26_032622) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -420,6 +420,44 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_15_100443) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["family_id"], name: "index_family_exports_on_family_id"
+  end
+
+  create_table "goal_contributions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "goal_id", null: false
+    t.uuid "transaction_id"
+    t.decimal "amount", precision: 19, scale: 4, null: false
+    t.string "currency", null: false
+    t.date "contribution_date", null: false
+    t.string "contribution_type", default: "manual", null: false
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["goal_id", "contribution_date"], name: "index_goal_contributions_on_goal_id_and_contribution_date"
+    t.index ["goal_id"], name: "index_goal_contributions_on_goal_id"
+    t.index ["transaction_id"], name: "index_goal_contributions_on_transaction_id"
+  end
+
+  create_table "goals", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "family_id", null: false
+    t.string "name", null: false
+    t.string "goal_type", default: "savings", null: false
+    t.decimal "target_amount", precision: 19, scale: 4, null: false
+    t.string "currency", null: false
+    t.date "target_date"
+    t.string "status", default: "active", null: false
+    t.decimal "current_amount", precision: 19, scale: 4, default: "0.0"
+    t.date "start_date"
+    t.datetime "completed_at"
+    t.string "color"
+    t.string "lucide_icon"
+    t.text "description"
+    t.jsonb "linked_account_ids", default: []
+    t.jsonb "milestones", default: []
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["family_id", "status"], name: "index_goals_on_family_id_and_status"
+    t.index ["family_id"], name: "index_goals_on_family_id"
+    t.index ["target_date"], name: "index_goals_on_target_date"
   end
 
   create_table "holdings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1180,6 +1218,9 @@ ActiveRecord::Schema[7.2].define(version: 2025_12_15_100443) do
   add_foreign_key "eval_runs", "eval_datasets"
   add_foreign_key "eval_samples", "eval_datasets"
   add_foreign_key "family_exports", "families"
+  add_foreign_key "goal_contributions", "goals"
+  add_foreign_key "goal_contributions", "transactions"
+  add_foreign_key "goals", "families"
   add_foreign_key "holdings", "account_providers"
   add_foreign_key "holdings", "accounts", on_delete: :cascade
   add_foreign_key "holdings", "securities"

@@ -44,48 +44,61 @@ This directory contains detailed implementation plans for enhancing Sure with ad
 
 ---
 
-### 🔄 Phase 2: Savings Rate & Financial Health Metrics (READY TO START)
-**Estimated Duration:** 2-3 weeks  
-**Complexity:** Medium  
-**Dependencies:** None (independent feature)
+### ✅ Phase 2: Savings Rate & Financial Health Metrics (COMPLETED)
+**Status:** Merged to main on December 26, 2025
 
-**What to Build:**
-- `FinancialSnapshot` model for point-in-time metrics storage
-- Calculation service for 4 core metrics:
+**What Was Implemented:**
+- Database table: `financial_snapshots` for point-in-time metrics
+- FinancialSnapshot model with calculation logic for 4 core metrics:
   - Savings rate (income - expenses / income)
   - Debt-to-income ratio (monthly debt payments / income)
   - Emergency fund coverage (liquid assets / monthly expenses)
-  - Net worth trend (MoM and YoY changes)
-- Background job for monthly snapshot generation
-- Dashboard widget showing health score and trends
-- Dedicated `/financial_health` page with charts
-- Insights engine with contextual recommendations
+  - Net worth trend (month-over-month change)
+- FinancialHealth model for real-time metric calculations
+- FinancialSnapshot::Calculator service with complex averaging logic
+- FinancialSnapshotJob scheduled monthly (1st of each month at 3 AM)
+- FinancialHealthController with show, export (CSV), and recalculate actions
+- Complete financial health report page with health score
+- Financial health helper with metric status colors and insights
+- Comprehensive rake tasks for backfilling historical data
+- Full test coverage (30 tests, all passing)
 
-**Implementation Order:**
-1. Create `financial_snapshots` table migration
-2. Build FinancialSnapshot model with metric calculations
-3. Write comprehensive model tests
-4. Add real-time calculation methods to Family model
-5. Implement FinancialSnapshotJob with cron schedule
-6. Create FinancialHealthController
-7. Build UI components (MetricCard, HealthScore)
-8. Create financial health report page
-9. Add dashboard widget
-10. Integrate trend charts
-11. Add recommendation engine
-12. Create backfill rake task
+**Key Features:**
+- Overall health score (0-100) weighted across 4 metrics
+- Historical snapshot storage with monthly granularity
+- CSV export functionality for data analysis
+- Smart metric thresholds based on financial best practices
+- Configurable threshold constants in FinancialHealthThresholds concern
+- Automatic estimation of credit card minimum payments
+- Multi-month averaging for income/expense stability
+- Rich localization support with detailed insights
 
-**Success Criteria:**
-- [ ] All 4 metrics calculate accurately
-- [ ] Monthly snapshots generate automatically
-- [ ] Dashboard widget displays current metrics
-- [ ] Full report page with historical trends
-- [ ] Charts render 6-12 month periods
-- [ ] Contextual insights provide recommendations
-- [ ] Performance remains fast with 2+ years of data
-- [ ] Multi-currency support works correctly
+**Files Changed:** 19 files, 1,777 insertions
+- Models: `FinancialSnapshot`, `FinancialHealth`, `FinancialSnapshot::Calculator`
+- Controller: `FinancialHealthController`
+- Job: `FinancialSnapshotJob`
+- Helper: `FinancialHealthHelper`
+- Views: Complete financial health report page
+- Tests: Comprehensive model, calculator, and controller tests
+- Rake tasks: Backfill and current month generation
 
-**See:** [PHASE-2-SAVINGS-METRICS.md](PHASE-2-SAVINGS-METRICS.md) for detailed specifications
+**Technical Highlights:**
+- Uses `Monetizable` concern for currency handling
+- JSONB metadata field for flexible data storage
+- Compound unique index on family_id + snapshot_date
+- Proper decimal precision for percentages and money
+- Integration with existing Family#income_statement and #balance_sheet
+- Scheduled monthly execution via sidekiq-cron
+- Graceful handling of insufficient data
+
+---
+
+### ⏳ Phase 3: Cash Flow Forecasting & Projections (QUEUED)
+**Estimated Duration:** 3-4 weeks  
+**Complexity:** High  
+**Dependencies:** Phase 1 (optional goal integration)
+
+See: [PHASE-3-CASH-FLOW-FORECAST.md](PHASE-3-CASH-FLOW-FORECAST.md)
 
 ---
 

@@ -612,4 +612,168 @@ class RecurringTransactionTest < ActiveSupport::TestCase
     assert RecurringTransaction.exists?(manual_recurring.id)
     assert_not RecurringTransaction.exists?(auto_recurring.id)
   end
+
+  # Cash flow projection related tests
+  test "paused? returns true when paused_until is in the future" do
+    recurring = RecurringTransaction.new(
+      family: @family,
+      merchant: @merchant,
+      amount: 15.99,
+      currency: "USD",
+      expected_day_of_month: 5,
+      status: "active",
+      paused_until: 1.week.from_now.to_date
+    )
+
+    assert recurring.paused?
+  end
+
+  test "paused? returns false when paused_until is nil" do
+    recurring = RecurringTransaction.new(
+      family: @family,
+      merchant: @merchant,
+      amount: 15.99,
+      currency: "USD",
+      expected_day_of_month: 5,
+      status: "active",
+      paused_until: nil
+    )
+
+    assert_not recurring.paused?
+  end
+
+  test "paused? returns false when paused_until is in the past" do
+    recurring = RecurringTransaction.new(
+      family: @family,
+      merchant: @merchant,
+      amount: 15.99,
+      currency: "USD",
+      expected_day_of_month: 5,
+      status: "active",
+      paused_until: 1.week.ago.to_date
+    )
+
+    assert_not recurring.paused?
+  end
+
+  test "update_confidence! increases confidence on match" do
+    recurring = RecurringTransaction.create!(
+      family: @family,
+      merchant: @merchant,
+      amount: 15.99,
+      currency: "USD",
+      expected_day_of_month: 5,
+      status: "active",
+      confidence_score: 0.7
+    )
+
+    recurring.update_confidence!(matched: true)
+
+    assert_equal 0.75, recurring.reload.confidence_score
+    assert_not_nil recurring.last_matched_at
+  end
+
+  test "update_confidence! decreases confidence on miss" do
+    recurring = RecurringTransaction.create!(
+      family: @family,
+      merchant: @merchant,
+      amount: 15.99,
+      currency: "USD",
+      expected_day_of_month: 5,
+      status: "active",
+      confidence_score: 0.7
+    )
+
+    recurring.update_confidence!(matched: false)
+
+    assert_equal 0.6, recurring.reload.confidence_score
+  end
+
+  test "update_confidence! caps confidence at 0.95" do
+    recurring = RecurringTransaction.create!(
+      family: @family,
+      merchant: @merchant,
+      amount: 15.99,
+      currency: "USD",
+      expected_day_of_month: 5,
+      status: "active",
+      confidence_score: 0.93
+    )
+
+    recurring.update_confidence!(matched: true)
+
+    assert_equal 0.95, recurring.reload.confidence_score
+  end
+
+  test "update_confidence! floors confidence at 0.3" do
+    recurring = RecurringTransaction.create!(
+      family: @family,
+      merchant: @merchant,
+      amount: 15.99,
+      currency: "USD",
+      expected_day_of_month: 5,
+      status: "active",
+      confidence_score: 0.35
+    )
+
+    recurring.update_confidence!(matched: false)
+
+    assert_equal 0.3, recurring.reload.confidence_score
+  end
+
+  test "confidence_score validation accepts values between 0 and 1" do
+    recurring = RecurringTransaction.new(
+      family: @family,
+      merchant: @merchant,
+      amount: 15.99,
+      currency: "USD",
+      expected_day_of_month: 5,
+      status: "active",
+      confidence_score: 0.85
+    )
+
+    assert recurring.valid?
+  end
+
+  test "confidence_score validation rejects values greater than 1" do
+    recurring = RecurringTransaction.new(
+      family: @family,
+      merchant: @merchant,
+      amount: 15.99,
+      currency: "USD",
+      expected_day_of_month: 5,
+      status: "active",
+      confidence_score: 1.5
+    )
+
+    assert_not recurring.valid?
+    assert_includes recurring.errors[:confidence_score], "must be less than or equal to 1"
+  end
+
+  test "not_paused scope excludes paused recurring transactions" do
+    paused = RecurringTransaction.create!(
+      family: @family,
+      merchant: @merchant,
+      amount: 15.99,
+      currency: "USD",
+      expected_day_of_month: 5,
+      status: "active",
+      paused_until: 1.week.from_now.to_date
+    )
+
+    active = RecurringTransaction.create!(
+      family: @family,
+      merchant: merchants(:amazon),
+      amount: 9.99,
+      currency: "USD",
+      expected_day_of_month: 10,
+      status: "active",
+      paused_until: nil
+    )
+
+    results = @family.recurring_transactions.not_paused
+
+    assert_includes results, active
+    assert_not_includes results, paused
+  end
 end

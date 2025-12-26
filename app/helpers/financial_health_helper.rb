@@ -159,7 +159,7 @@ module FinancialHealthHelper
           icon: "trending-up",
           color: "text-success",
           title: I18n.t("financial_health.insights.net_worth.growing.title"),
-          description: I18n.t("financial_health.insights.net_worth.growing.description", percentage: percentage.abs.round(1))
+          description: I18n.t("financial_health.insights.net_worth.growing.description", percentage: percentage.round(1))
         }
       elsif percentage >= -5
         {

@@ -135,12 +135,12 @@ class CashFlowController < ApplicationController
         scenario_ending_balance: scenario_end,
         difference: (scenario_end - original_end).round(2),
         impact_description: if scenario_end > original_end
-          t(".positive_impact", amount: (scenario_end - original_end).abs.round(2))
-        elsif scenario_end < original_end
-          t(".negative_impact", amount: (original_end - scenario_end).abs.round(2))
-        else
-          t(".no_impact")
-        end
+                              t(".positive_impact", amount: (scenario_end - original_end).abs.round(2))
+                            elsif scenario_end < original_end
+                              t(".negative_impact", amount: (original_end - scenario_end).abs.round(2))
+                            else
+                              t(".no_impact")
+                            end
       }
     end
 end

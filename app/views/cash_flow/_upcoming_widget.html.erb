@@ -11,11 +11,11 @@
 
   <% if @alerts.any? %>
     <% alert = @alerts.first %>
-    <div class="mb-4 p-3 rounded-lg <%= alert[:severity] == :critical ? 'bg-destructive/10' : 'bg-warning/10' %>">
+    <div class="mb-4 p-3 rounded-lg <%= alert[:severity] == :critical ? "bg-destructive/10" : "bg-warning/10" %>">
       <div class="flex items-center gap-2">
         <%= icon(alert[:severity] == :critical ? "alert-triangle" : "alert-circle",
             class: "w-4 h-4 #{alert[:severity] == :critical ? 'text-destructive' : 'text-warning'}") %>
-        <span class="text-sm font-medium <%= alert[:severity] == :critical ? 'text-destructive' : 'text-warning' %>">
+        <span class="text-sm font-medium <%= alert[:severity] == :critical ? "text-destructive" : "text-warning" %>">
           <% if alert[:type] == :overdraft %>
             <%= t("cash_flow.upcoming.overdraft_alert", days: alert[:days_until]) %>
           <% else %>
@@ -31,7 +31,7 @@
       <% @upcoming_projections.first(5).each do |projection| %>
         <div class="flex items-center justify-between py-2 border-b border-secondary/50 last:border-0">
           <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-full flex items-center justify-center <%= projection[:type] == :income ? 'bg-success/10' : 'bg-destructive/10' %>">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center <%= projection[:type] == :income ? "bg-success/10" : "bg-destructive/10" %>">
               <%= icon(projection[:type] == :income ? "arrow-down-left" : "arrow-up-right",
                   class: "w-4 h-4 #{projection[:type] == :income ? 'text-success' : 'text-destructive'}") %>
             </div>
@@ -40,8 +40,8 @@
               <p class="text-xs text-subdued"><%= l(projection[:date], format: :short) %></p>
             </div>
           </div>
-          <span class="text-sm font-medium <%= projection[:type] == :income ? 'text-success' : 'text-destructive' %>">
-            <%= projection[:type] == :income ? '+' : '-' %><%= number_to_currency(projection[:amount]) %>
+          <span class="text-sm font-medium <%= projection[:type] == :income ? "text-success" : "text-destructive" %>">
+            <%= projection[:type] == :income ? "+" : "-" %><%= number_to_currency(projection[:amount]) %>
           </span>
         </div>
       <% end %>

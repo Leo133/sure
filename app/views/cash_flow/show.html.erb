@@ -32,11 +32,11 @@
   <% if @alerts.any? %>
     <section class="space-y-2">
       <% @alerts.each do |alert| %>
-        <div class="flex items-center gap-3 p-4 rounded-xl <%= alert[:severity] == :critical ? 'bg-destructive/10 border border-destructive/20' : 'bg-warning/10 border border-warning/20' %>">
+        <div class="flex items-center gap-3 p-4 rounded-xl <%= alert[:severity] == :critical ? "bg-destructive/10 border border-destructive/20" : "bg-warning/10 border border-warning/20" %>">
           <%= icon(alert[:severity] == :critical ? "alert-triangle" : "alert-circle",
               class: "w-5 h-5 #{alert[:severity] == :critical ? 'text-destructive' : 'text-warning'}") %>
           <div class="flex-1">
-            <p class="text-sm font-medium <%= alert[:severity] == :critical ? 'text-destructive' : 'text-warning' %>">
+            <p class="text-sm font-medium <%= alert[:severity] == :critical ? "text-destructive" : "text-warning" %>">
               <% if alert[:type] == :overdraft %>
                 <%= t(".overdraft_warning", date: l(alert[:date], format: :long)) %>
               <% else %>
@@ -89,7 +89,7 @@
         <%= icon("calculator", class: "w-5 h-5 text-subdued") %>
         <h3 class="text-secondary text-sm font-medium"><%= t(".ending_balance") %></h3>
       </div>
-      <p class="text-2xl font-bold <%= @summary[:ending_balance] >= 0 ? 'text-primary' : 'text-destructive' %>">
+      <p class="text-2xl font-bold <%= @summary[:ending_balance] >= 0 ? "text-primary" : "text-destructive" %>">
         <%= number_to_currency(@summary[:ending_balance]) %>
       </p>
     </div>
@@ -124,12 +124,12 @@
         <% balance_point = @balance_curve.find { |p| p[:date] == date } %>
 
         <%= turbo_frame_tag "day_#{date}" do %>
-          <div class="bg-container p-2 min-h-24 cursor-pointer hover:bg-surface-inset transition-colors <%= date.month != @start_date.month ? 'opacity-50' : '' %>"
+          <div class="bg-container p-2 min-h-24 cursor-pointer hover:bg-surface-inset transition-colors <%= date.month != @start_date.month ? "opacity-50" : "" %>"
                data-action="click->cash-flow-calendar#showDayDetails"
                data-date="<%= date %>"
                data-cash-flow-calendar-target="day">
             <div class="flex items-start justify-between mb-1">
-              <span class="text-sm font-medium <%= date == Date.current ? 'text-primary bg-primary/10 rounded-full w-6 h-6 flex items-center justify-center' : 'text-secondary' %>">
+              <span class="text-sm font-medium <%= date == Date.current ? "text-primary bg-primary/10 rounded-full w-6 h-6 flex items-center justify-center" : "text-secondary" %>">
                 <%= date.day %>
               </span>
               <% if day_projections.any? %>
@@ -156,7 +156,7 @@
 
             <% if balance_point %>
               <div class="mt-auto pt-1 border-t border-secondary/20">
-                <span class="text-xs <%= balance_point[:balance] >= 0 ? 'text-subdued' : 'text-destructive' %>">
+                <span class="text-xs <%= balance_point[:balance] >= 0 ? "text-subdued" : "text-destructive" %>">
                   <%= number_to_currency(balance_point[:balance], precision: 0) %>
                 </span>
               </div>

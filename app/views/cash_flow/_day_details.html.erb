@@ -16,7 +16,7 @@
             <% projections.each do |projection| %>
               <div class="flex items-center justify-between p-3 rounded-lg bg-surface-inset">
                 <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-full flex items-center justify-center <%= projection[:type] == :income ? 'bg-success/10' : 'bg-destructive/10' %>">
+                  <div class="w-8 h-8 rounded-full flex items-center justify-center <%= projection[:type] == :income ? "bg-success/10" : "bg-destructive/10" %>">
                     <%= icon(projection[:type] == :income ? "arrow-down-left" : "arrow-up-right",
                         class: "w-4 h-4 #{projection[:type] == :income ? 'text-success' : 'text-destructive'}") %>
                   </div>
@@ -31,8 +31,8 @@
                   </div>
                 </div>
                 <div class="text-right">
-                  <p class="text-sm font-medium <%= projection[:type] == :income ? 'text-success' : 'text-destructive' %>">
-                    <%= projection[:type] == :income ? '+' : '-' %><%= number_to_currency(projection[:amount]) %>
+                  <p class="text-sm font-medium <%= projection[:type] == :income ? "text-success" : "text-destructive" %>">
+                    <%= projection[:type] == :income ? "+" : "-" %><%= number_to_currency(projection[:amount]) %>
                   </p>
                   <% if projection[:amount_min].present? && projection[:amount_max].present? && projection[:amount_min] != projection[:amount_max] %>
                     <p class="text-xs text-subdued">
@@ -52,8 +52,8 @@
 
             <div class="flex items-center justify-between text-sm">
               <span class="text-secondary"><%= t(".net_for_day") %></span>
-              <span class="font-medium <%= net >= 0 ? 'text-success' : 'text-destructive' %>">
-                <%= net >= 0 ? '+' : '' %><%= number_to_currency(net) %>
+              <span class="font-medium <%= net >= 0 ? "text-success" : "text-destructive" %>">
+                <%= net >= 0 ? "+" : "" %><%= number_to_currency(net) %>
               </span>
             </div>
           </div>

@@ -4,7 +4,7 @@ class GoalContribution < ApplicationRecord
   CONTRIBUTION_TYPES = %w[manual automatic linked].freeze
 
   belongs_to :goal
-  belongs_to :transaction, optional: true
+  belongs_to :related_transaction, class_name: "Transaction", foreign_key: "transaction_id", optional: true
 
   validates :amount, presence: true, numericality: { greater_than: 0 }
   validates :currency, presence: true

@@ -15,16 +15,15 @@ class GoalTest < ActiveSupport::TestCase
   end
 
   test "validates goal type is one of allowed values" do
-    goal = Goal.new(
-      family: @family,
-      name: "Test Goal",
-      target_amount: 1000,
-      currency: "USD",
-      goal_type: "invalid_type"
-    )
-
-    assert_not goal.valid?
-    assert_includes goal.errors[:goal_type], "is not included in the list"
+    assert_raises(ArgumentError) do
+      Goal.new(
+        family: @family,
+        name: "Test Goal",
+        target_amount: 1000,
+        currency: "USD",
+        goal_type: "invalid_type"
+      )
+    end
   end
 
   test "calculates progress percentage correctly" do

@@ -3,7 +3,7 @@ class Goal < ApplicationRecord
 
   GOAL_TYPES = %w[savings debt_payoff net_worth emergency_fund custom].freeze
   STATUSES = %w[active completed paused].freeze
-  DEFAULT_MILESTONES = [25, 50, 75, 100].freeze
+  DEFAULT_MILESTONES = [ 25, 50, 75, 100 ].freeze
 
   belongs_to :family
   has_many :goal_contributions, dependent: :destroy
@@ -197,7 +197,7 @@ class Goal < ApplicationRecord
       # If current debt is negative (overpayment), treat as fully paid
       return original_debt if current_debt <= 0
 
-      [original_debt - current_debt, 0].max
+      [ original_debt - current_debt, 0 ].max
     end
 
     def calculate_net_worth_progress
